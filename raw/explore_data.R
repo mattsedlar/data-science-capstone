@@ -11,7 +11,7 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt",.015*twitter.n)),
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .015 * twitter.n)),
           data.frame(sample_lines("data/en_US.blogs.txt", .015 * blog.n)),
           data.frame(sample_lines("data/en_US.news.txt", .015 * news.n)))
 
@@ -23,14 +23,16 @@ inspect(c)
  
 # eliminate whitespace
 c <- tm_map(c, stripWhitespace)
-# convert to lowercase
+# remove all punctuation except apostrophes, fix 'I'm'
+(f <- content_transformer(function(x,pattern,sub) gsub(pattern,sub,x)))
+c <- tm_map(c, f, "[^[:alnum:][:space:]']","")
+c <- tm_map(c, f, "(i'm)","I'm")
+# to lower case
 c <- tm_map(c, content_transformer(tolower))
-# remove punctuation
-c <- tm_map(c, content_transformer(removePunctuation))
 # remove numbers
 c <- tm_map(c, content_transformer(removeNumbers))
-# stem words
-# c <- tm_map(c, stemDocument)
 
-# document term matrix
+writeCorpus(c,"data")
+
+# term document matrix
 tdm <- TermDocumentMatrix(c)
