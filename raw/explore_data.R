@@ -34,5 +34,32 @@ c <- tm_map(c, content_transformer(removeNumbers))
 
 writeCorpus(c,"data")
 
+# TOKENIZER
+BigramTokenizer <- function(x) {
+  unlist(lapply(ngrams(words(x),2),paste, collapse=" "), use.names = F)
+}
+
 # term document matrix
-tdm <- TermDocumentMatrix(c)
+tdm <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
+
+# removing sparse terms
+tdm.common40 <- removeSparseTerms(tdm,.4)
+
+# finding most-common terms
+tdm.common40.matrix <- as.matrix(tdm.common40)
+
+frequency <- rowSums(tdm.common40.matrix)
+
+frequency <- sort(frequency, decreasing = T)
+
+head(frequency)
+
+# wordcloud
+
+library(wordcloud)
+
+words <- names(frequency)
+
+wordcloud(words[1:100], frequency[1:100], scale=c(10,.75))
+
+## Ngrams
