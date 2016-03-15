@@ -67,13 +67,15 @@ c <- Corpus(VectorSource(docs))
 
 ## Cleaning the Data
 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+(f <- content_transformer(function(x,pattern,sub) gsub(pattern,sub,x)))
+```
 
 ```{r}
 
 # eliminate whitespace
 c <- tm_map(c, stripWhitespace)
 # remove all punctuation except apostrophes, fix 'I'm'
-(f <- content_transformer(function(x,pattern,sub) gsub(pattern,sub,x)))
 c <- tm_map(c, f, "[^[:alnum:][:space:]']","")
 c <- tm_map(c, f, "(i'm)","I'm")
 # to lower case
@@ -84,7 +86,7 @@ c <- tm_map(c, content_transformer(removeNumbers))
 # profanity filtering
 bad.words <- c()
 bad.nouns <- c("ass","nigg","dick")
-bad.verbs <- c("fuck","shit")
+bad.verbs <- c("fuck","shit","suck","fart")
 
 bad.words <- c(bad.words,
                paste(bad.nouns,"(a|as|es|er?)?s?|",sep=""),
@@ -95,9 +97,9 @@ c <- tm_map(c, f, bad.words,"")
 
 ```
 
-Once the data is cleaned, I can turn it into a term document matrix and get a better idea of what it looks like. I'm interested in both 1-grams and 2-grams, or frequently occuring words and two-word combinations. Below are two visualizations of the data: a histogram for 1-gram and 2-grams as well as wordclouds.
+Once the data is cleaned, I can turn it into a term document matrix and get a better idea of what it looks like. I'm interested in both 1-grams and 2-grams, or frequently occuring words and two-word combinations. The two figures below look at the frequency of 1-gram and 2-grams in the corpus.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
 
 # TOKENIZER
 BigramTokenizer <- function(x) {
@@ -106,35 +108,46 @@ BigramTokenizer <- function(x) {
 
 # term document matrix, 1-gram and 2-gram
 tdm.1g <- TermDocumentMatrix(c)
-# tdm.2g <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
+tdm.2g <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
 
 tdm.1g.matrix <- as.matrix(tdm.1g)
-#tdm.2g.matrix <- as.matrix(tmd.2g)
+tdm.2g.matrix <- as.matrix(tdm.2g)
 
 frequency.1g <- rowSums(tdm.1g.matrix)
-#frequncey.2g <- rowSums(tmd.2g.matrix)
+frequency.2g <- rowSums(tdm.2g.matrix)
 
 frequency.1g <- sort(frequency.1g, decreasing = T)
-#frequency.2g <- sort(frequency.2g, decreasing = T)
+frequency.2g <- sort(frequency.2g, decreasing = T)
 
 ```
 
-## Has the data scientist made basic plots, such as histograms to illustrate features of the data?
+```{r echo=FALSE, warning=TRUE, message=FALSE, cache=TRUE}
 
-```{r}
+df.1g <- data.frame(word=names(frequency.1g),freq=frequency.1g)
+df.1g$word <- factor(df.1g$word, levels = df.1g$word[order(-df.1g$freq)])
 
-df <- data.frame(word=names(frequency.1g),freq=frequency.1g)
-df$word <- factor(df$word, levels = df$word[order(-df$freq)])
+df.2g <- data.frame(word=names(frequency.2g),freq=frequency.2g)
+df.2g$word <- factor(df.2g$word, levels = df.2g$word[order(-df.2g$freq)])
+
 
 require(ggplot2)
 
-ggplot(df[1:25,]) + geom_bar(aes(word,freq,fill=freq),stat="identity") +
+ggplot(df.1g[1:25,]) + geom_bar(aes(word,freq,fill=freq),stat="identity") +
   ggtitle("Frequency of Top 25 1-grams") +
   ylab("Frequency") +
   xlab("Words") +
   theme(axis.text.x=element_text(angle=90),
         plot.title=element_text(size=15, face="bold"),
         legend.position="none")
+
+ggplot(df.2g[1:25,]) + geom_bar(aes(word,freq,fill=freq),stat="identity") +
+  ggtitle("Frequency of Top 25 2-grams") +
+  ylab("Frequency") +
+  xlab("Words") +
+  theme(axis.text.x=element_text(angle=90),
+        plot.title=element_text(size=15, face="bold"),
+        legend.position="none")
+
 
 ```
 
