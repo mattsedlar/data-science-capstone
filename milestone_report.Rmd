@@ -1,4 +1,141 @@
-## Does the link lead to an HTML page describing the exploratory analysis of the training data set?
-## Has the data scientist done basic summaries of the three files? Word counts, line counts and basic data tables?
+---
+title: "Data Science Capstone Milestone Report"
+author: "Matthew Sedlar"
+date: "March 20, 2016"
+output: html_document
+---
+
+This report contains an exploratory analysis of data used in the Coursera/Johns Hopkins Bloomberg School of Public Health Data Science Capstone Project. 
+
+## The Data
+
+This project is an attempt to create a predictive text model using text mining procedures. The data, supplied by Coursera in partnership with SwiftKey, consists of three large text documents split by various sources -- blogs, news reports and Twitter.
+
+Basic summaries of the text documents follow:
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
+
+require(stringi)
+
+# this is the method used to count lines and words below
+# but is not integrated into the report because it's a
+# memory intensive process
+
+twitter.doc <- stri_conv(readLines("data/en_US.twitter.txt"),"UTF-8")
+blog.doc <- stri_conv(readLines("data/en_US.blogs.txt"),"UTF-8")
+news.doc <- stri_conv(readLines("data/en_US.news.txt"),"UTF-8")
+
+print(paste("News, ", stri_stats_general(news.doc)[[1]],
+           " lines of text, containing ",
+           stri_stats_latex(news.doc)[[4]], " words.", sep = ""))
+print(paste("Blogs, ", stri_stats_general(blog.doc)[[1]],
+           " lines of text, containing ",
+           stri_stats_latex(blog.doc)[[4]], " words.", sep = ""))
+print(paste("Twitter, ", stri_stats_general(twitter.doc)[[1]],
+           " lines of text, containing ",
+           stri_stats_latex(twitter.doc)[[4]], " words.", sep = ""))
+
+```
+
+* News, 1,010,242 lines of text, containing 34,494,539 words.
+* Blogs, 899,288 lines of text, containing 37,570,839 words.
+* Twitter, 2,360,148 lines of text, containing 30,451,128 words.
+
+Because of the size of each document, I chose to use the `sample_lines` function in the LaF package to sample 1.5% of lines from each document and create a corpus of the text.
+
+```{r message=FALSE}
+
+require(tm)
+require(LaF)
+
+# read lines randomly into a data frame
+set.seed(1234)
+
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", 
+                                  .015 * 2360148,
+                                  2360148)),
+          data.frame(sample_lines("data/en_US.blogs.txt",
+                                  .015 * 899288,
+                                  899288)),
+          data.frame(sample_lines("data/en_US.news.txt",
+                                  .015 * 1010242,
+                                  1010242)))
+
+c <- Corpus(VectorSource(docs))
+
+```
+
+## Cleaning the Data
+
+
+```{r}
+
+# eliminate whitespace
+c <- tm_map(c, stripWhitespace)
+# remove all punctuation except apostrophes, fix 'I'm'
+(f <- content_transformer(function(x,pattern,sub) gsub(pattern,sub,x)))
+c <- tm_map(c, f, "[^[:alnum:][:space:]']","")
+c <- tm_map(c, f, "(i'm)","I'm")
+# to lower case
+c <- tm_map(c, content_transformer(tolower))
+# remove numbers
+c <- tm_map(c, content_transformer(removeNumbers))
+
+# profanity filtering
+bad.words <- c()
+bad.nouns <- c("ass","nigg","dick")
+bad.verbs <- c("fuck","shit")
+
+bad.words <- c(bad.words,
+               paste(bad.nouns,"(a|as|es|er?)?s?|",sep=""),
+               paste(bad.verbs,"(a|e|ed|er|ing?)?s?|",sep=""))
+
+bad.words <- paste(bad.words,collapse="")
+c <- tm_map(c, f, bad.words,"")
+
+```
+
+Once the data is cleaned, I can turn it into a term document matrix and get a better idea of what it looks like. I'm interested in both 1-grams and 2-grams, or frequently occuring words and two-word combinations. Below are two visualizations of the data: a histogram for 1-gram and 2-grams as well as wordclouds.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+# TOKENIZER
+BigramTokenizer <- function(x) {
+  unlist(lapply(ngrams(words(x),2),paste, collapse=" "), use.names = F)
+}
+
+# term document matrix, 1-gram and 2-gram
+tdm.1g <- TermDocumentMatrix(c)
+# tdm.2g <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
+
+tdm.1g.matrix <- as.matrix(tdm.1g)
+#tdm.2g.matrix <- as.matrix(tmd.2g)
+
+frequency.1g <- rowSums(tdm.1g.matrix)
+#frequncey.2g <- rowSums(tmd.2g.matrix)
+
+frequency.1g <- sort(frequency.1g, decreasing = T)
+#frequency.2g <- sort(frequency.2g, decreasing = T)
+
+```
+
 ## Has the data scientist made basic plots, such as histograms to illustrate features of the data?
+
+```{r}
+
+df <- data.frame(word=names(frequency.1g),freq=frequency.1g)
+df$word <- factor(df$word, levels = df$word[order(-df$freq)])
+
+require(ggplot2)
+
+ggplot(df[1:25,]) + geom_bar(aes(word,freq,fill=freq),stat="identity") +
+  ggtitle("Frequency of Top 25 1-grams") +
+  ylab("Frequency") +
+  xlab("Words") +
+  theme(axis.text.x=element_text(angle=90),
+        plot.title=element_text(size=15, face="bold"),
+        legend.position="none")
+
+```
+
 ## Was the report written in a brief, concise style, in a way that a non-data scientist manager could appreciate?
