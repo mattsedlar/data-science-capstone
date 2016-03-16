@@ -7,9 +7,9 @@ output: html_document
 
 This report contains an exploratory analysis of data used in the Coursera/Johns Hopkins Bloomberg School of Public Health Data Science Capstone Project. 
 
-## The Data
+### Description of Data and Project
 
-This project is an attempt to create a predictive text model using text mining procedures. The data, supplied by Coursera in partnership with SwiftKey, consists of three large text documents split by various sources -- blogs, news reports and Twitter.
+The purpose of this project is to attempt to create a predictive text model using text mining procedures on documents supplied by Coursera in partnership with SwiftKey. The data consists of three large text documents categorized by various sources -- blogs, news reports and Twitter.
 
 Basic summaries of the text documents follow:
 
@@ -41,7 +41,7 @@ print(paste("Twitter, ", stri_stats_general(twitter.doc)[[1]],
 * Blogs, 899,288 lines of text, containing 37,570,839 words.
 * Twitter, 2,360,148 lines of text, containing 30,451,128 words.
 
-Because of the size of each document, I chose to use the `sample_lines` function in the LaF package to sample 1.5% of lines from each document and create a corpus of the text.
+Because of the size of each document, I chose to use the `sample_lines` function in the LaF package to randomly sample 1.5% of lines from each document and create a corpus of the text.
 
 ```{r message=FALSE}
 
@@ -65,9 +65,12 @@ c <- Corpus(VectorSource(docs))
 
 ```
 
-## Cleaning the Data
+### Cleaning the Data
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+Before I could conduct an analysis, I had to strip whitespace, numbers and other unwanted characters from the corpus. To strip out obscene words in the text, I also created a profanity filter. (I won't include those words in the report, because well, they're obscene.)
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+# gsub function for corpus
 (f <- content_transformer(function(x,pattern,sub) gsub(pattern,sub,x)))
 ```
 
@@ -82,11 +85,14 @@ c <- tm_map(c, f, "(i'm)","I'm")
 c <- tm_map(c, content_transformer(tolower))
 # remove numbers
 c <- tm_map(c, content_transformer(removeNumbers))
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 # profanity filtering
 bad.words <- c()
-bad.nouns <- c("ass","nigg","dick")
-bad.verbs <- c("fuck","shit","suck","fart")
+bad.nouns <- c("ass","nigg","dick","slut")
+bad.verbs <- c("fuck","shit","suck","fart","piss","bitch")
 
 bad.words <- c(bad.words,
                paste(bad.nouns,"(a|as|es|er?)?s?|",sep=""),
@@ -97,9 +103,9 @@ c <- tm_map(c, f, bad.words,"")
 
 ```
 
-Once the data is cleaned, I can turn it into a term document matrix and get a better idea of what it looks like. I'm interested in both 1-grams and 2-grams, or frequently occuring words and two-word combinations. The two figures below look at the frequency of 1-gram and 2-grams in the corpus.
+Once the data was cleaned, I converted it into what is called a term document matrix -- or a matrix listing terms as rows and the documents as columns. Each column in the matrix lists how many times that term appears in a document. Using this, I can get an idea of which words appear the most, which will help with determining probabilities in my eventual model. 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 # TOKENIZER
 BigramTokenizer <- function(x) {
@@ -119,7 +125,15 @@ frequency.2g <- rowSums(tdm.2g.matrix)
 frequency.1g <- sort(frequency.1g, decreasing = T)
 frequency.2g <- sort(frequency.2g, decreasing = T)
 
+total_words <- sum(34494539,37570839,30451128)
+
 ```
+
+After all the sampling and cleaning, I have 1,191,252 words, which is about `r floor((sum(frequency.1g)/total_words) * 100)`% of the original corpus.
+
+### Frequency of Words
+
+For my predictive text model, I'm interested in both 1-grams and 2-grams, or frequently occuring words and two-word combinations. With term document matrices and the `tm` package's `BigramTokenizer`, I can get a better look at these. The two figures below look at the frequency of 1-gram and 2-grams in the corpus.
 
 ```{r echo=FALSE, warning=TRUE, message=FALSE, cache=TRUE}
 
@@ -151,4 +165,14 @@ ggplot(df.2g[1:25,]) + geom_bar(aes(word,freq,fill=freq),stat="identity") +
 
 ```
 
-## Was the report written in a brief, concise style, in a way that a non-data scientist manager could appreciate?
+### Limitations
+
+I realize that by only working with `r floor((sum(frequency.1g)/total_words) * 100)`% of the data, my model may run into terms or situations that will be difficult to handle. Unfortunately, working with more of the data is taxing on my computer and has led to many frustrating sessions of killing processes to keep R going and running out of memory. Companies like SwiftKey developing these models have the best equipment, and sadly I don't have the budget for that. I hope to make up for some of these limitations by implementing supervised learning features in my final model. 
+
+### Goals for My Model
+
+Based on the analysis, I have set the following goals for my model.
+
+* Respond to user input by chaining together 1-gram and 2-gram terms with a higher probability of appearing based on the first letter.
+* Follow the rules of English syntax. For example, if the user enters a pronoun, such as "he," a suggestion for a verb should follow, like "is" or "went." Software like TreeTagger works hand in hand with R packages like `koRpus` to identify and label words in a text document.
+* The model should continue to learn from user input. I'm not sure how to accomplish this last point. Storing user input into a new corpus, writing that to the server, and loading it each time is the easiest option, but as the corpus grows over time, that will affect the model load time. 
