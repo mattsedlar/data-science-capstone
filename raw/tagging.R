@@ -1,6 +1,6 @@
 require(koRpus)
 
-tt <- list(path="~/Applications/treetagger",
+tt <- list(path="~/Applications/tree-tagger-linux-3/",
            preset="en")
 
 files <- list.files(path="data", pattern="[1-3].txt", full.names=T,recursive=F)
