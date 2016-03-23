@@ -11,9 +11,9 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0175 * twitter.n,nlines=twitter.n)),
-          data.frame(sample_lines("data/en_US.blogs.txt", .0175 * blog.n, nlines=blog.n)),
-          data.frame(sample_lines("data/en_US.news.txt", .0175 * news.n, nlines=news.n)))
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .015 * twitter.n,nlines=twitter.n)),
+          data.frame(sample_lines("data/en_US.blogs.txt", .015 * blog.n, nlines=blog.n)),
+          data.frame(sample_lines("data/en_US.news.txt", .015 * news.n, nlines=news.n)))
 
 # # corpora
 c <- Corpus(VectorSource(docs))
@@ -47,24 +47,31 @@ c <- tm_map(c, f, bad.words,"")
 writeCorpus(c,"data")
 
 # # TOKENIZER
-# BigramTokenizer <- function(x) {
-#   unlist(lapply(ngrams(words(x),2),paste, collapse=" "), use.names = F)
-# }
+ BigramTokenizer <- function(x) {
+   unlist(lapply(ngrams(words(x),2),paste, collapse=" "), use.names = F)
+ }
 # 
 # # term document matrix, 1-gram and 2-gram
 tdm.1g <- TermDocumentMatrix(c)
-# tdm.2g <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
+tdm.2g <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
 # 
 # # removing sparse terms
 tdm.1g.common20 <- removeSparseTerms(tdm.1g,.20)
-# tdm.2g.common20 <- removeSparseTerms(tdm.2g,.20)
+tdm.2g.common20 <- removeSparseTerms(tdm.2g,.20)
 # 
 # # finding most-common terms
 tdm.1g.common20.matrix <- as.matrix(tdm.1g.common20)
-# tdm.2g.common20.matrix <- as.matrix(tdm.2g.common20)
-# 
+tdm.2g.common20.matrix <- as.matrix(tdm.2g.common20)
+
+# frequency for calculating probabilities 
 frequency.1g <- rowSums(tdm.1g.common20.matrix)
-# frequency.2g <- rowSums(tdm.2g.common20.matrix)
+frequency.2g <- rowSums(tdm.2g.common20.matrix)
 # 
 frequency.1g <- sort(frequency.1g, decreasing = T)
-# frequency.2g <- sort(frequency.2g, decreasing = T)
+frequency.2g <- sort(frequency.2g, decreasing = T)
+
+df.1g <- data.frame(token=names(frequency.1g), freq=frequency.1g)
+df.2g <- data.frame(token=names(frequency.2g), freq=frequency.2g)
+
+write.csv(df.1g,"data/final/onegrams.csv",row.names = F)
+write.csv(df.2g,"data/final/twograms.csv",row.names = F)
