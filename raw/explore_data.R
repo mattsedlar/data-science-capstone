@@ -46,32 +46,44 @@ c <- tm_map(c, f, bad.words,"")
 
 writeCorpus(c,"data")
 
-# # TOKENIZER
- BigramTokenizer <- function(x) {
-   unlist(lapply(ngrams(words(x),2),paste, collapse=" "), use.names = F)
- }
+# # TOKENIZERS
+
+BigramTokenizer <- function(x) {
+ unlist(lapply(ngrams(words(x),2),paste,collapse=" "), use.names = F)
+}
+TrigramTokenizer <- function(x) {
+  unlist(lapply(ngrams(words(x),3),paste,collapse=" "), use.names = F)
+}
 # 
 # # term document matrix, 1-gram and 2-gram
 tdm.1g <- TermDocumentMatrix(c)
 tdm.2g <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
+tdm.3g <- TermDocumentMatrix(c, control=list(tokenize=TrigramTokenizer))
 # 
 # # removing sparse terms
 tdm.1g.common20 <- removeSparseTerms(tdm.1g,.20)
 tdm.2g.common20 <- removeSparseTerms(tdm.2g,.20)
+tdm.3g.common20 <- removeSparseTerms(tdm.3g,.20)
 # 
 # # finding most-common terms
 tdm.1g.common20.matrix <- as.matrix(tdm.1g.common20)
 tdm.2g.common20.matrix <- as.matrix(tdm.2g.common20)
+tdm.3g.common20.matrix <- as.matrix(tdm.3g.common20)
 
 # frequency for calculating probabilities 
 frequency.1g <- rowSums(tdm.1g.common20.matrix)
 frequency.2g <- rowSums(tdm.2g.common20.matrix)
+frequency.3g <- rowSums(tdm.3g.common20.matrix)
+
 # 
 frequency.1g <- sort(frequency.1g, decreasing = T)
 frequency.2g <- sort(frequency.2g, decreasing = T)
+frequency.3g <- sort(frequency.3g, decreasing = T)
 
 df.1g <- data.frame(token=names(frequency.1g), freq=frequency.1g)
 df.2g <- data.frame(token=names(frequency.2g), freq=frequency.2g)
+df.3g <- data.frame(token=names(frequency.3g), freq=frequency.3g)
 
 write.csv(df.1g,"data/final/onegrams.csv",row.names = F)
 write.csv(df.2g,"data/final/twograms.csv",row.names = F)
+write.csv(df.3g,"data/final/threegrams.csv",row.names = F)

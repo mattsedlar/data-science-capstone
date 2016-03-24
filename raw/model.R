@@ -4,13 +4,17 @@ require(tm)
 
 df.1g <- read.csv("data/final/onegrams.csv")
 df.2g <- read.csv("data/final/twograms.csv")
+df.3g <- read.csv("data/final/threegrams.csv")
 
-pronouns <- c("I", "me", "he",
-              "she", "herself", "you",
-              "it", "that", "they", "each", 
-              "few", "many", "who",
-              "whoever", "whose", "someone",
-              "everybody")
+pronouns <- c("all","another","any", "anybody","anyone","anything",
+              "both", "each", "either","everybody","everyone","everything",
+              "few","he","her","herself","him","himself","his",
+              "I","it","its","itself","many","me","mine","more","most","much","myself",
+              "neither","nobody","none","nothing","one","other","others","ours","ourselves",
+              "several","she","some","somebody","something","that","their","theirs",
+              "themselves","these","they","this","those","us","we","what","whatever",
+              "whichever","who","whoever","whom","whomever","whose","you","your",
+              "yours","yourself","yourselves")
 
 ## start model
 
