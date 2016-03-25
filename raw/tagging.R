@@ -3,23 +3,29 @@ require(koRpus)
 tt <- list(path="~/Applications/tree-tagger-linux-3/",
            preset="en")
 
-files <- list.files(path="data", pattern="[1-3].txt", full.names=T,recursive=F)
+# files <- list.files(path="data", pattern="[1-3].txt", full.names=T,recursive=F)
 
-tagged.text <- lapply(files,treetag,treetagger="manual",lang="en",TT.options=tt)
+twitter.df <- read.table("data/3.txt", sep="\t")
+twitter.df$V1 <- sub(" .*","",twitter.df$V1)
+write.table(twitter.df,"data/tagtest.txt",quote = F, row.names = F, col.names = F)
+
+tagged.text <- treetag("data/tagtest.txt",
+                                 treetag,
+                                 treetagger="manual",
+                                 lang="en",TT.options=tt)
 
 
-tagged.df <- rbind(taggedText(tagged.text[[1]]),
-                   taggedText(tagged.text[[2]]),
-                   taggedText(tagged.text[[3]]))
-
-# adding frequency
-tagged.df <- transform(tagged.df, freq.token= ave(seq(nrow(tagged.df)), token, FUN=length))
+tagged.df <- data.frame(taggedText(tagged.text))
 
 # removing duplicates
 tagged.df <- tagged.df[!duplicated(tagged.df$token),]
 
-# order by frequency
-tagged.df <- tagged.df[order(-tagged.df$freq.token),]
+# remove unknonws
+tagged.df <- subset(tagged.df, lemma != "<unknown>")
 
 # reorder rownames
 rownames(tagged.df) <- c(1:nrow(tagged.df))
+
+require(dplyr)
+
+stats <- tagged.df %>% group_by(desc) %>% summarize(sum = n()) 
