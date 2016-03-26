@@ -19,13 +19,15 @@ pronouns <- c("all","and", "another","any", "anybody","anyone","anything",
               "whichever","who","whoever","whom","whomever","whose","you","your",
               "yours","yourself","yourselves")
 
+punctuation <- c(".","!","?")
+
 ## start model
 
 model <- function(x) {
   
   # handling the first word
    if(!grepl(" ",x) >= 1) {
-  
+    print("you went here")
     index <- x == substr(pronouns[1:length(pronouns)],1,nchar(x))
     result <- pronouns[which(index==TRUE)]
     
@@ -37,7 +39,9 @@ model <- function(x) {
     else { 
       if (length(result) > 1) {
         #df.1g as tie-breaker
-        search <- subset(df.1g, grepl(paste("(",paste(result,collapse="|"),")"),token))
+        search <- subset(df.1g, grepl(paste("(",
+                                            paste(result,collapse="|")
+                                            ,")", sep=""),token))
         print(head(search$token,1))
         
       } else {
@@ -69,11 +73,11 @@ model <- function(x) {
     }
     # 5-Inf-grams
     if(length(temp[[1]]) >= 4) {    
-      search <- subset(df.4g, grepl(paste("^",
-                                          paste(temp[[1]][((length(temp[[1]]) - 3) + 1):length(temp[[1]])],
+      search <- subset(df.3g, grepl(paste("^",
+                                          paste(temp[[1]][((length(temp[[1]]) - 3) + 2):length(temp[[1]])],
                                                 collapse=" "),
                                           sep=""),token))
-      print(paste(paste(temp[[1]][1:(length(temp[[1]]) - 3)], collapse=" "),
+      print(paste(paste(temp[[1]][1:(length(temp[[1]]) - 2)], collapse=" "),
                   head(search$token,1)))
     }
     
