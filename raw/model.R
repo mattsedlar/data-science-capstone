@@ -53,23 +53,28 @@ model <- function(x) {
       search <- subset(df.2g,grepl(paste("^",x,sep=""),token))
       print(head(search$token,1))      
     }
+    # 3-grams
     if(length(temp[[1]]) == 2) {    
-      search <- subset(df.2g, grepl(paste("^",
-                                          paste(temp[[1]],collapse=" "),
-                                          sep=""),token))
-      print(head(search$token,1))
-    }
-    if(length(temp[[1]]) == 3) {    
       search <- subset(df.3g, grepl(paste("^",
                                           paste(temp[[1]],collapse=" "),
                                           sep=""),token))
       print(head(search$token,1))
     }
-    if(length(temp[[1]]) == 4) {    
+    # 4-grams
+    if(length(temp[[1]]) == 3) {    
       search <- subset(df.4g, grepl(paste("^",
                                           paste(temp[[1]],collapse=" "),
                                           sep=""),token))
       print(head(search$token,1))
+    }
+    # 5-Inf-grams
+    if(length(temp[[1]]) >= 4) {    
+      search <- subset(df.4g, grepl(paste("^",
+                                          paste(temp[[1]][((length(temp[[1]]) - 3) + 1):length(temp[[1]])],
+                                                collapse=" "),
+                                          sep=""),token))
+      print(paste(paste(temp[[1]][1:(length(temp[[1]]) - 3)], collapse=" "),
+                  head(search$token,1)))
     }
     
   }
