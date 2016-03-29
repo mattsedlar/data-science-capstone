@@ -27,11 +27,10 @@ model <- function(x) {
   
   # handling the first word
    if(!grepl(" ",x) >= 1) {
-    print("you went here")
     index <- x == substr(pronouns[1:length(pronouns)],1,nchar(x))
     result <- pronouns[which(index==TRUE)]
     
-    if(length(result)== 0) { 
+    if(length(result) == 0) { 
       search <- subset(df.1g,substr(token,1,nchar(x))==x)
       print(head(search$token,1))
     }
@@ -54,22 +53,39 @@ model <- function(x) {
   else if (grep(" ",x) == 1) {
     temp <- strsplit(x, " ")
     if(length(temp[[1]]) == 1) {
+
       search <- subset(df.2g,grepl(paste("^",x,sep=""),token))
-      print(head(search$token,1))      
+      
+      result <- head(search$token,1)
+      
+      if (length(result) > 0) {
+        print(result)
+      } else { print(paste(temp[[1]],collapse = " ")) }
+
     }
     # 3-grams
     if(length(temp[[1]]) == 2) {    
       search <- subset(df.3g, grepl(paste("^",
                                           paste(temp[[1]],collapse=" "),
                                           sep=""),token))
-      print(head(search$token,1))
+      result <- head(search$token,1)
+      
+      if (length(result) > 0) {
+        print(result)
+      } else { print(paste(temp[[1]],collapse = " ")) }
+      
     }
     # 4-grams
     if(length(temp[[1]]) == 3) {    
       search <- subset(df.4g, grepl(paste("^",
                                           paste(temp[[1]],collapse=" "),
                                           sep=""),token))
-      print(head(search$token,1))
+      result <- head(search$token,1)
+      
+      if (length(result) > 0) {
+        print(result)
+      } else { print(paste(temp[[1]],collapse = " ")) }
+      
     }
     # 5-Inf-grams
     if(length(temp[[1]]) >= 4) {    
@@ -77,8 +93,26 @@ model <- function(x) {
                                           paste(temp[[1]][((length(temp[[1]]) - 3) + 2):length(temp[[1]])],
                                                 collapse=" "),
                                           sep=""),token))
-      print(paste(paste(temp[[1]][1:(length(temp[[1]]) - 2)], collapse=" "),
-                  head(search$token,1)))
+      result <- head(search$token,1)
+      
+      if(length(result) > 0) {
+        
+        print(paste(paste(temp[[1]][1:(length(temp[[1]]) - 2)], collapse=" "),
+                    result)) 
+      } else {
+      
+        search <- subset(df.2g, grepl(paste("^",temp[[1]][length(temp[[1]])],
+                                            sep=""),token))
+        
+        result <- head(search$token,1)
+        
+        if(length(result) > 0) {
+          print(paste(paste(temp[[1]][1:length(temp[[1]]-1)], collapse=" "),
+                      result))
+        } else { print(paste(temp[[1]],collapse = " ")) }        
+      
+      }
+
     }
     
   }
