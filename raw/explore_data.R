@@ -11,9 +11,9 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .016 * twitter.n,nlines=twitter.n)),
-          data.frame(sample_lines("data/en_US.blogs.txt", .016 * blog.n, nlines=blog.n)),
-          data.frame(sample_lines("data/en_US.news.txt", .016 * news.n, nlines=news.n)))
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0165 * twitter.n,nlines=twitter.n)),
+          data.frame(sample_lines("data/en_US.blogs.txt", .0165 * blog.n, nlines=blog.n)),
+          data.frame(sample_lines("data/en_US.news.txt", .0165 * news.n, nlines=news.n)))
 
 # # corpora
 c <- Corpus(VectorSource(docs))
@@ -57,45 +57,49 @@ TrigramTokenizer <- function(x) {
 QuatrogramTokenizer <- function(x) {
   unlist(lapply(ngrams(words(x),4),paste,collapse=" "), use.names = F)
 }
+CincogramTokenizer <- function(x) {
+  unlist(lapply(ngrams(words(x),5),paste,collapse=" "), use.names = F)
+}
 # 
 # # term document matrix for 1-4grams
 tdm.1g <- TermDocumentMatrix(c)
 tdm.2g <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
 tdm.3g <- TermDocumentMatrix(c, control=list(tokenize=TrigramTokenizer))
 tdm.4g <- TermDocumentMatrix(c, control=list(tokenize=QuatrogramTokenizer))
+tdm.5g <- TermDocumentMatrix(c, control=list(tokenize=CincogramTokenizer))
 # 
-# # removing sparse terms in 1-gram
-tdm.1g.common20 <- removeSparseTerms(tdm.1g,.20)
-tdm.2g.common50 <- removeSparseTerms(tdm.2g,.50)
-tdm.3g.common50 <- removeSparseTerms(tdm.3g,.50)
-tdm.4g.common50 <- removeSparseTerms(tdm.4g,.50)
+# # removing sparse terms in 1-4-grams
+tdm.1g.common50 <- removeSparseTerms(tdm.1g,.50)
 # 
 # # finding most-common terms
-tdm.1g.common20.matrix <- as.matrix(tdm.1g.common20)
-tdm.2g.common50.matrix <- as.matrix(tdm.2g.common50)
-tdm.3g.common50.matrix <- as.matrix(tdm.3g.common50)
-tdm.4g.common50.matrix <- as.matrix(tdm.4g.common50)
-
+tdm.1g.common50.matrix <- as.matrix(tdm.1g.common50)
+tdm.2g.matrix <- as.matrix(tdm.2g)
+tdm.3g.matrix <- as.matrix(tdm.3g)
+tdm.4g.matrix <- as.matrix(tdm.4g)
+tdm.5g.matrix <- as.matrix(tdm.5g)
 
 # frequency for calculating probabilities 
-frequency.1g <- rowSums(tdm.1g.common20.matrix)
-frequency.2g <- rowSums(tdm.2g.common50.matrix)
-frequency.3g <- rowSums(tdm.3g.common50.matrix)
-frequency.4g <- rowSums(tdm.4g.common50.matrix)
+frequency.1g <- rowSums(tdm.1g.common50.matrix)
+frequency.2g <- rowSums(tdm.2g.matrix)
+frequency.3g <- rowSums(tdm.3g.matrix)
+frequency.4g <- rowSums(tdm.4g.matrix)
+frequency.5g <- rowSums(tdm.5g.matrix)
 
 # 
 frequency.1g <- sort(frequency.1g, decreasing = T)
 frequency.2g <- sort(frequency.2g, decreasing = T)
 frequency.3g <- sort(frequency.3g, decreasing = T)
 frequency.4g <- sort(frequency.4g, decreasing = T)
-
+frequency.5g <- sort(frequency.5g, decreasing = T)
 
 df.1g <- data.frame(token=names(frequency.1g), freq=frequency.1g)
 df.2g <- data.frame(token=names(frequency.2g), freq=frequency.2g)
 df.3g <- data.frame(token=names(frequency.3g), freq=frequency.3g)
 df.4g <- data.frame(token=names(frequency.4g), freq=frequency.4g)
+df.5g <- data.frame(token=names(frequency.5g), freq=frequency.5g)
 
 write.csv(df.1g,"data/final/onegrams.csv",row.names = F)
 write.csv(df.2g,"data/final/twograms.csv",row.names = F)
 write.csv(df.3g,"data/final/threegrams.csv",row.names = F)
 write.csv(df.4g,"data/final/fourgrams.csv",row.names = F)
+write.csv(df.5g,"data/final/fivegrams.csv",row.names = F)
