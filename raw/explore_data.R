@@ -11,9 +11,9 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .015 * twitter.n,nlines=twitter.n)),
-          data.frame(sample_lines("data/en_US.blogs.txt", .0225 * blog.n, nlines=blog.n)),
-          data.frame(sample_lines("data/en_US.news.txt", .0225 * news.n, nlines=news.n)))
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0175 * twitter.n,nlines=twitter.n)),
+          data.frame(sample_lines("data/en_US.blogs.txt", .0215 * blog.n, nlines=blog.n)),
+          data.frame(sample_lines("data/en_US.news.txt", .0215 * news.n, nlines=news.n)))
 
 # # corpora
 c <- Corpus(VectorSource(docs))
@@ -23,7 +23,7 @@ inspect(c)
  
 # eliminate whitespace
 c <- tm_map(c, stripWhitespace)
-(f <- content_transformer(function(x,pattern,sub) gsub(pattern,sub,x,perl=F)))
+(f <- content_transformer(function(x,pattern,sub) gsub(pattern,sub,x)))
 # to lower case
 c <- tm_map(c, content_transformer(tolower))
 # remove numbers
@@ -43,8 +43,8 @@ bad.words <- substr(bad.words,1,nchar(bad.words)-1)
 c <- tm_map(c, f, bad.words,"")
 
 # punctuation
-punctuation <- "(?!')[[:punct:]]"
-c <- tm_map(c, f, bad.words,"",perl=T)
+punctuation <- "[^[:alnum:][:space:]']"
+c <- tm_map(c, f, punctuation,"")
 
 writeCorpus(c,"data")
 
