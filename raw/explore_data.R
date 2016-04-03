@@ -2,6 +2,7 @@ require(tm)
 require(R.utils)
 require(LaF)
 require(SnowballC)
+require(quanteda)
 
 # count lines first to speed up process
 twitter.n <- countLines("data/en_US.twitter.txt")
@@ -11,15 +12,14 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0175 * twitter.n,nlines=twitter.n)),
-          data.frame(sample_lines("data/en_US.blogs.txt", .0215 * blog.n, nlines=blog.n)),
-          data.frame(sample_lines("data/en_US.news.txt", .0215 * news.n, nlines=news.n)))
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .025 * twitter.n,nlines=twitter.n)),
+          data.frame(sample_lines("data/en_US.blogs.txt", .045 * blog.n, nlines=blog.n)),
+          data.frame(sample_lines("data/en_US.news.txt", .045 * news.n, nlines=news.n)),
+          data.frame(readLines("data/en_US.academic.txt", encoding="UTF-8")))
 
-# # corpora
-c <- Corpus(VectorSource(docs))
+# # corpora with tm
+c <- VCorpus(VectorSource(docs))
 
-# check it out
-inspect(c)
  
 # eliminate whitespace
 c <- tm_map(c, stripWhitespace)
@@ -46,43 +46,38 @@ c <- tm_map(c, f, bad.words,"")
 punctuation <- "[^[:alnum:][:space:]']"
 c <- tm_map(c, f, punctuation,"")
 
-writeCorpus(c,"data")
-
 # # TOKENIZERS
+c.quant <- corpus(c)
+rm(c)
 
-BigramTokenizer <- function(x) {
- unlist(lapply(ngrams(words(x),2),paste,collapse=" "), use.names = F)
-}
-TrigramTokenizer <- function(x) {
-  unlist(lapply(ngrams(words(x),3),paste,collapse=" "), use.names = F)
-}
-QuatrogramTokenizer <- function(x) {
-  unlist(lapply(ngrams(words(x),4),paste,collapse=" "), use.names = F)
-}
-#CincogramTokenizer <- function(x) {
-#  unlist(lapply(ngrams(words(x),5),paste,collapse=" "), use.names = F)
-#}
-# 
-# # term document matrix for 1-4grams
-tdm.1g <- TermDocumentMatrix(c)
-tdm.2g <- TermDocumentMatrix(c, control=list(tokenize=BigramTokenizer))
-tdm.3g <- TermDocumentMatrix(c, control=list(tokenize=TrigramTokenizer))
-tdm.4g <- TermDocumentMatrix(c, control=list(tokenize=QuatrogramTokenizer))
-#tdm.5g <- TermDocumentMatrix(c, control=list(tokenize=CincogramTokenizer))
-# 
-# 
-# # finding most-common terms
-tdm.1g.matrix <- as.matrix(tdm.1g)
-tdm.2g.matrix <- as.matrix(tdm.2g)
-tdm.3g.matrix <- as.matrix(tdm.3g)
-tdm.4g.matrix <- as.matrix(tdm.4g)
-#tdm.5g.matrix <- as.matrix(tdm.5g)
+#unigrams
+tokens <- tokenize(c.quant)
+dfm <- dfm(tokens)
+rm(tokens)
+
+#bigrams
+tokens2 <- tokenize(c.quant,ngrams=2, concatenator=" ")
+dfm2 <- dfm(tokens2)
+dfm2 <- trim(dfm2, minDoc = 2)
+rm(tokens2)
+
+#trigrams
+tokens3 <- tokenize(c.quant,what="fasterword",ngrams=3, concatenator=" ")
+dfm3 <- dfm(tokens3)
+dfm3 <- trim(dfm3, minDoc = 2)
+rm(tokens3)
+
+#quadgrams
+tokens4 <- tokenize(c.quant,what="fasterword",ngrams=4, concatenator=" ")
+dfm4 <- dfm(tokens4)
+dfm4 <- trim(dfm4, minDoc = 2)
+rm(tokens4)
 
 # frequency for calculating probabilities 
-frequency.1g <- rowSums(tdm.1g.matrix)
-frequency.2g <- rowSums(tdm.2g.matrix)
-frequency.3g <- rowSums(tdm.3g.matrix)
-frequency.4g <- rowSums(tdm.4g.matrix)
+frequency.1g <- colSums(dfm)
+frequency.2g <- colSums(dfm2)
+frequency.3g <- colSums(dfm3)
+frequency.4g <- colSums(dfm4)
 #frequency.5g <- rowSums(tdm.5g.matrix)
 
 # 
