@@ -5,7 +5,8 @@ shinyUI(fluidPage(
   titlePanel("Predictive Text Model"),
   
    fluidRow(
-     textInput("text",label=h3("Text Input"))
+     textInput("text",label=h3("Text Input")),
+     textOutput("result")
    )  
   
 ))

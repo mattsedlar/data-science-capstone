@@ -12,7 +12,7 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .025 * twitter.n,nlines=twitter.n)),
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .03 * twitter.n,nlines=twitter.n)),
           data.frame(sample_lines("data/en_US.blogs.txt", .045 * blog.n, nlines=blog.n)),
           data.frame(sample_lines("data/en_US.news.txt", .045 * news.n, nlines=news.n)),
           data.frame(readLines("data/en_US.academic.txt", encoding="UTF-8")))
@@ -58,7 +58,7 @@ rm(tokens)
 #bigrams
 tokens2 <- tokenize(c.quant,ngrams=2, concatenator=" ")
 dfm2 <- dfm(tokens2)
-dfm2 <- trim(dfm2, minDoc = 2)
+dfm2 <- trim(dfm2, minCount = 2)
 rm(tokens2)
 
 #trigrams

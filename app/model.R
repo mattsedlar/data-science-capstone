@@ -2,10 +2,10 @@ require(tm)
 require(data.table)
 
 # read in n-grams
-df.1g <- fread("data/final/onegrams.csv")
-df.2g <- fread("data/final/twograms.csv")
-df.3g <- fread("data/final/threegrams.csv")
-df.4g <- fread("data/final/fourgrams.csv")
+df.1g <- fread("data/onegrams.csv")
+df.2g <- fread("data/twograms.csv")
+df.3g <- fread("data/threegrams.csv")
+df.4g <- fread("data/fourgrams.csv")
 
 ngraminator <- function(x, spaces) {
   
@@ -39,8 +39,6 @@ ngraminator <- function(x, spaces) {
   
   # trigrams
   if(spaces == 2){
-    
-    print("trigrams")
     # probability of first two words
     prob_a <- subset(df.2g,grepl(paste("^",
                                        paste(temp[[1]][1:2], collapse=" ")
@@ -56,7 +54,6 @@ ngraminator <- function(x, spaces) {
       result <- strsplit(as.character(head(trigrams$token,1))," ")
       print(result[[1]][3])
     } else {
-      print("backoff 1")
       prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][2],sep=""),token))[1,]
       bigrams <- subset(df.2g,grepl(paste("^",
                                           paste(temp[[1]][2:3], collapse=" "),
@@ -67,7 +64,6 @@ ngraminator <- function(x, spaces) {
         result <- strsplit(as.character(head(bigrams$token,1))," ")
         print(result[[1]][2])
       } else {
-        print("backoff 2")
         unigrams <- subset(df.1g,grepl(paste("^",temp[[1]][3],sep=""),token))
         unigrams$conditional <- 0.4 * 0.4 * (as.numeric(unigrams$prob))
         unigrams <- unigrams[order(-unigrams$conditional),]
@@ -79,8 +75,6 @@ ngraminator <- function(x, spaces) {
   
   # quadgrams
   if(spaces == 3){
-    
-    print("quadgrams")
     # probability of first three words
     prob_a <- subset(df.3g,grepl(paste("^",
                                        paste(temp[[1]][1:3], collapse=" ")
@@ -113,7 +107,6 @@ ngraminator <- function(x, spaces) {
         result <- strsplit(as.character(head(trigrams$token,1))," ")
         print(result[[1]][3])
       } else {
-        print("backoff 1")
         prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][3],sep=""),token))[1,]
         bigrams <- subset(df.2g,grepl(paste("^",
                                             paste(temp[[1]][3:4], collapse=" "),
@@ -124,7 +117,6 @@ ngraminator <- function(x, spaces) {
           result <- strsplit(as.character(head(bigrams$token,1))," ")
           print(result[[1]][2])
         } else {
-          print("backoff 2")
           unigrams <- subset(df.1g,grepl(paste("^",temp[[1]][4],sep=""),token))
           unigrams$conditional <- 0.4 * 0.4 * 0.4 * (as.numeric(unigrams$prob))
           unigrams <- unigrams[order(-unigrams$conditional),]
@@ -161,11 +153,9 @@ bea <- function(x) {
       temp <- strsplit(x," ")
       if (is_blank == " ") {
         x <- paste(paste(temp[[1]][(length(temp[[1]])-2):length(temp[[1]])],collapse=" "),"")
-        print(x)
         ngraminator(x,3)
       } else { 
         x <- paste(temp[[1]][(length(temp[[1]])-2):length(temp[[1]])],collapse=" ")
-        print(x)
         ngraminator(x,2)
       }
     }
