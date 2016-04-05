@@ -26,7 +26,9 @@ ngraminator <- function(x, spaces) {
       result <- strsplit(as.character(head(bigrams$token,1))," ")
       print(result[[1]][2])
     } else {
-      unigrams <- subset(df.1g,grepl(paste(gsub(" ","",sub(temp[[1]][1],"",x)),sep=""),token))
+      unigrams <- subset(df.1g,grepl(paste("^",
+                                           paste(gsub(" ","",sub(temp[[1]][1],"",x)),
+                                                 sep=""),sep=""),token))
       unigrams$conditional <- 0.4 * 0.4 * (as.numeric(unigrams$prob))
       unigrams <- unigrams[order(-unigrams$conditional),]
       result <- head(unigrams$token,1)
@@ -51,9 +53,10 @@ ngraminator <- function(x, spaces) {
       result <- strsplit(as.character(head(trigrams$token,1))," ")
       print(result[[1]][3])
     } else {
+      print("backoff 1")
       prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][2],sep=""),token))[1,]
       bigrams <- subset(df.2g,grepl(paste("^",
-                                          paste(temp[[1]][2], collapse=" "),
+                                          trimws(sub(temp[[1]][1],"",x)),
                                           sep=""),token))
       if(!is.na(prob_a$token) & length(bigrams$token)>0) {        
         bigrams$conditional <- 0.4 * 0.4 * (as.numeric(bigrams$prob)/prob_a$prob)
@@ -61,10 +64,10 @@ ngraminator <- function(x, spaces) {
         result <- strsplit(as.character(head(bigrams$token,1))," ")
         print(result[[1]][2])
       } else {
-        unigrams <- subset(df.1g,grepl(paste(gsub(" ",
+        unigrams <- subset(df.1g,grepl(paste("^",paste(gsub(" ",
                                                   "",
                                                   sub(paste(temp[[1]][1:2],collapse=" "),
-                                                      "",x)),sep=""),token))
+                                                      "",x)),sep=""),sep=""),token))
         unigrams$conditional <- 0.4 * 0.4 * (as.numeric(unigrams$prob))
         unigrams <- unigrams[order(-unigrams$conditional),]
         result <-head(unigrams$token,1)
