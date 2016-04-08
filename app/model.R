@@ -1,5 +1,6 @@
 require(tm)
 require(data.table)
+require(dplyr)
 
 # read in n-grams
 df.1g <- fread("data/onegrams.csv")
@@ -53,7 +54,6 @@ ngraminator <- function(x, spaces) {
       result <- strsplit(as.character(head(trigrams$token,1))," ")
       print(result[[1]][3])
     } else {
-      print("backoff 1")
       prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][2],sep=""),token))[1,]
       bigrams <- subset(df.2g,grepl(paste("^",
                                           trimws(sub(temp[[1]][1],"",x)),
@@ -78,7 +78,6 @@ ngraminator <- function(x, spaces) {
   
   # quadgrams
   if(spaces == 3){
-    print(x)
     # probability of first three words
     prob_a <- subset(df.3g,grepl(paste("^",
                                        paste(temp[[1]][1:3], collapse=" ")
@@ -94,7 +93,6 @@ ngraminator <- function(x, spaces) {
       result <- strsplit(as.character(head(quadgrams$token,1))," ")
       print(result[[1]][4])
     } else {    
-      print("backoff 1")
       # probability of last two words
       prob_a <- subset(df.2g,grepl(paste("^",
                                          paste(temp[[1]][2:3], collapse=" "),
@@ -114,7 +112,6 @@ ngraminator <- function(x, spaces) {
         result <- strsplit(as.character(head(trigrams$token,1))," ")
         print(result[[1]][3])
       } else {
-        print("backoff 2")
         prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][3],sep=""),token))[1,]
         bigrams <- subset(df.2g,grepl(paste("^",paste(gsub(" ",
                                                  "",
@@ -127,7 +124,6 @@ ngraminator <- function(x, spaces) {
           result <- strsplit(as.character(head(bigrams$token,1))," ")
           print(result[[1]][2])
         } else {
-          print("backoff 3")
           unigrams <- subset(df.1g,grepl(paste("^",paste(gsub(" ",
                                                              "",
                                                              sub(paste(temp[[1]][1:3],
@@ -143,7 +139,29 @@ ngraminator <- function(x, spaces) {
   }
 }
 
-bea <- function(x) {
+phraseinator <- function(x) {
+  if(nchar(x) >= mean(nchar(df.3g$token))) {
+    x <- tolower(x)
+    # unigrams
+    tokens <- unlist(strsplit(x,"[^a-z]+"))
+    tokens <- tokens[tokens != " "]
+    # bigrams
+    tokens2 <- c(tokens[-1],".")
+    tokens2 <- paste(tokens,tokens2)
+    tokens2 <- tokens2[1:length(tokens2)-1]
+ 
+    # frequencies
+    freq2 <- sort(table(tokens2),decreasing = T)
+    
+    df2 <- data.frame(token=c(names(freq2),df.2g$token),freq=c(freq2,df.2g$freq))
+    
+    df2 <- df2 %>% group_by(token) %>% summarize(freq = sum(freq))
+    print("Thanks for improving my model!")
+  } else { print("This phrase is too short.") }
+}
+
+betty <- function(x) {
+  phrase <- x
   # convert to lowercase
   x <- tolower(x)
   # unigram
@@ -168,14 +186,12 @@ bea <- function(x) {
       temp <- strsplit(x," ")
       if (is_blank == " ") {
         x <- paste(paste(temp[[1]][(length(temp[[1]])-2):length(temp[[1]])],collapse=" "),"")
-        print(x)
         ngraminator(x,3)
       } else { 
         x <- paste(temp[[1]][(length(temp[[1]])-2):length(temp[[1]])],collapse=" ")
-        print(x)
         ngraminator(x,2)
       }
     }
 
-  }        
+  }
 }

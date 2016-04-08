@@ -2,12 +2,14 @@ library(shiny)
 
 shinyUI(fluidPage(
   # Application Title
-  titlePanel("Predictive Text Model"),
+  titlePanel("NextWord: Predictive Text Model"),
   
    fluidRow(
      mainPanel(
-     textInput("text",label=h3("Text Input")),
+     textInput("text",label=h3("Enter some text")),
+     h4("Prediction:"),
      textOutput("result")
+
      )
    )  
   

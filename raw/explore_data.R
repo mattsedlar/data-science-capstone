@@ -12,10 +12,11 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .03 * twitter.n,nlines=twitter.n)),
-          data.frame(sample_lines("data/en_US.blogs.txt", .045 * blog.n, nlines=blog.n)),
-          data.frame(sample_lines("data/en_US.news.txt", .045 * news.n, nlines=news.n)),
-          data.frame(readLines("data/en_US.academic.txt", encoding="UTF-8")))
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0275 * twitter.n,nlines=twitter.n)),
+          data.frame(sample_lines("data/en_US.blogs.txt", .0475 * blog.n, nlines=blog.n)),
+          data.frame(sample_lines("data/en_US.news.txt", .0475 * news.n, nlines=news.n)),
+          data.frame(readLines("data/en_US.academic.txt", encoding="UTF-8")),
+          data.frame(readLines("data/en_US.entertainment.txt", encoding = "UTF-8")))
 
 # # corpora with tm
 c <- VCorpus(VectorSource(docs))
@@ -31,7 +32,7 @@ c <- tm_map(c, content_transformer(removeNumbers))
 
 # profanity filtering
 bad.words <- c()
-bad.nouns <- c("ass","nigg","dick","slut","pussy","cunt","cooch","panties","titt","hell\\b")
+bad.nouns <- c("ass","nigg","dick","slut","pussy","cunt","cooch","panties","titt","\\bhell\\b","dildo")
 bad.verbs <- c("fuck","shit","suck","fart","piss","bitch")
 
 bad.words <- c(bad.words,
@@ -43,7 +44,7 @@ bad.words <- substr(bad.words,1,nchar(bad.words)-1)
 c <- tm_map(c, f, bad.words,"")
 
 # punctuation
-punctuation <- "[^[:alnum:][:space:]']"
+punctuation <- "[^[:alnum:][:space:]'-]"
 c <- tm_map(c, f, punctuation,"")
 
 # # TOKENIZERS
@@ -78,14 +79,12 @@ frequency.1g <- colSums(dfm)
 frequency.2g <- colSums(dfm2)
 frequency.3g <- colSums(dfm3)
 frequency.4g <- colSums(dfm4)
-#frequency.5g <- rowSums(tdm.5g.matrix)
 
 # 
 frequency.1g <- sort(frequency.1g, decreasing = T)
 frequency.2g <- sort(frequency.2g, decreasing = T)
 frequency.3g <- sort(frequency.3g, decreasing = T)
 frequency.4g <- sort(frequency.4g, decreasing = T)
-#frequency.5g <- sort(frequency.5g, decreasing = T)
 
 # create data frames with probabilities
 
@@ -93,10 +92,8 @@ df.1g <- data.frame(token=names(frequency.1g), freq=frequency.1g, prob=frequency
 df.2g <- data.frame(token=names(frequency.2g), freq=frequency.2g, prob=frequency.2g/sum(frequency.2g))
 df.3g <- data.frame(token=names(frequency.3g), freq=frequency.3g, prob=frequency.3g/sum(frequency.3g))
 df.4g <- data.frame(token=names(frequency.4g), freq=frequency.4g, prob=frequency.4g/sum(frequency.4g))
-#df.5g <- data.frame(token=names(frequency.5g), freq=frequency.5g, prob=frequency.5g/sum(frequency.5g))
 
 write.csv(df.1g,"data/final/onegrams.csv",row.names = F)
 write.csv(df.2g,"data/final/twograms.csv",row.names = F)
 write.csv(df.3g,"data/final/threegrams.csv",row.names = F)
 write.csv(df.4g,"data/final/fourgrams.csv",row.names = F)
-#write.csv(df.5g,"data/final/fivegrams.csv",row.names = F)

@@ -1,9 +1,9 @@
 source("model.R")
 
-shinyServer(function(input,output){
+shinyServer(function(input,output,session){
   
   output$result <- renderPrint(
-    bea(input$text)
+    betty(input$text)
   )
 
 })
