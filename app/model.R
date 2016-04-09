@@ -24,8 +24,8 @@ ngraminator <- function(x, spaces) {
       # conditional probability of bigrams with backoff smoothing
       bigrams$conditional <- 0.4 * (as.numeric(bigrams$prob)/prob_a$prob)
       bigrams <- bigrams[order(-bigrams$conditional),]
-      result <- strsplit(as.character(head(bigrams$token,1))," ")
-      print(result[[1]][2])
+      result <- strsplit(as.character(head(bigrams$token,3))," ")
+      print(cat(result[[1]][2],result[[2]][2],result[[3]][2],sep = ", "))
     } else {
       unigrams <- subset(df.1g,grepl(paste("^",
                                            paste(gsub(" ","",sub(temp[[1]][1],"",x)),
