@@ -25,7 +25,7 @@ ngraminator <- function(x, spaces) {
       bigrams$conditional <- 0.4 * (as.numeric(bigrams$prob)/prob_a$prob)
       bigrams <- bigrams[order(-bigrams$conditional),]
       result <- strsplit(as.character(head(bigrams$token,3))," ")
-      print(cat(result[[1]][2],result[[2]][2],result[[3]][2],sep = ", "))
+      cat(result[[1]][2],result[[2]][2],result[[3]][2],sep = ", ",fill=T)
     } else {
       unigrams <- subset(df.1g,grepl(paste("^",
                                            paste(gsub(" ","",sub(temp[[1]][1],"",x)),
@@ -51,8 +51,8 @@ ngraminator <- function(x, spaces) {
       # conditional probability of trigrams with backoff smoothing
       trigrams$conditional <- 0.4 * (as.numeric(trigrams$prob)/prob_a$prob)
       trigrams <- trigrams[order(-trigrams$conditional),]
-      result <- strsplit(as.character(head(trigrams$token,1))," ")
-      print(result[[1]][3])
+      result <- strsplit(as.character(head(trigrams$token,3))," ")
+      cat(result[[1]][3],result[[2]][3],result[[3]][3],sep = ", ",fill=T)
     } else {
       prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][2],sep=""),token))[1,]
       bigrams <- subset(df.2g,grepl(paste("^",
@@ -167,7 +167,7 @@ betty <- function(x) {
   # unigram
   if(!grepl(" ",x) >= 1) {
     search <- subset(df.1g,grepl(paste("^",x,sep=""),token))
-    print(head(search$token,1))    
+    cat(paste(head(search$token,3),collapse = ", "))
   } 
   
   # everything else
