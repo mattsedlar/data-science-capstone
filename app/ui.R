@@ -20,11 +20,15 @@ border: 1px solid #fff;
 padding: 0 24px 24px 24px;
 box-shadow: 5px 5px 15px #0B1726;
 }
+
+#result {
+font-size: 18px;
+}
                                   "))
                 ),
   
   # Application Title
-  titlePanel("NexWord: Predictive Text Model"),
+  titlePanel("NexWord: Predictive Text Generator"),
   
   column(10,id="main",
          tags$form(class="form form-inline", role="form",
@@ -32,7 +36,7 @@ box-shadow: 5px 5px 15px #0B1726;
          tags$br(),
          actionLink("submitPhrase","Submit Phrase to Dictionary"),
          h4("Predictions:"),
-         htmlOutput("result",class="label label-info")
+         htmlOutput("result",class="label label-success")
   )
   
 ))

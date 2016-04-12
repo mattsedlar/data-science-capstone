@@ -61,8 +61,8 @@ ngraminator <- function(x, spaces) {
       if(!is.na(prob_a$token) & length(bigrams$token)>0) {        
         bigrams$conditional <- 0.4 * 0.4 * (as.numeric(bigrams$prob)/prob_a$prob)
         bigrams <- bigrams[order(-bigrams$conditional),]
-        result <- strsplit(as.character(head(bigrams$token,1))," ")
-        print(result[[1]][2])
+        result <- strsplit(as.character(head(bigrams$token,3))," ")
+        cat(result[[1]][2],result[[2]][2],result[[3]][2],sep = ", ",fill=T)
       } else {
         unigrams <- subset(df.1g,grepl(paste("^",paste(gsub(" ",
                                                   "",
@@ -70,8 +70,7 @@ ngraminator <- function(x, spaces) {
                                                       "",x)),sep=""),sep=""),token))
         unigrams$conditional <- 0.4 * 0.4 * (as.numeric(unigrams$prob))
         unigrams <- unigrams[order(-unigrams$conditional),]
-        result <-head(unigrams$token,1)
-        print(result)
+        cat(paste(head(unigrams$token,3),collapse = ", "))
       }
     }
   }
@@ -90,8 +89,8 @@ ngraminator <- function(x, spaces) {
       # conditional probability of quadgrams with backoff smoothing
       quadgrams$conditional <- 0.4 * (as.numeric(quadgrams$prob)/prob_a$prob)
       quadgrams <- quadgrams[order(-quadgrams$conditional),]
-      result <- strsplit(as.character(head(quadgrams$token,1))," ")
-      print(result[[1]][4])
+      result <- strsplit(as.character(head(quadgrams$token,3))," ")
+      cat(result[[1]][4],result[[2]][4],result[[3]][4],sep = ", ",fill=T)
     } else {    
       # probability of last two words
       prob_a <- subset(df.2g,grepl(paste("^",
@@ -109,8 +108,8 @@ ngraminator <- function(x, spaces) {
         # conditional probability of trigrams with backoff smoothing
         trigrams$conditional <- 0.4 * 0.4 * (as.numeric(trigrams$prob)/prob_a$prob)
         trigrams <- trigrams[order(-trigrams$conditional),]
-        result <- strsplit(as.character(head(trigrams$token,1))," ")
-        print(result[[1]][3])
+        result <- strsplit(as.character(head(trigrams$token,3))," ")
+        cat(result[[1]][3],result[[2]][3],result[[3]][3],sep = ", ",fill=T)
       } else {
         prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][3],sep=""),token))[1,]
         bigrams <- subset(df.2g,grepl(paste("^",paste(gsub(" ",
@@ -121,8 +120,8 @@ ngraminator <- function(x, spaces) {
         if(!is.na(prob_a$token) & length(bigrams$token)>0) {        
           bigrams$conditional <- 0.4 * 0.4 * 0.4 * (as.numeric(bigrams$prob))
           bigrams <- bigrams[order(-bigrams$conditional),]
-          result <- strsplit(as.character(head(bigrams$token,1))," ")
-          print(result[[1]][2])
+          result <- strsplit(as.character(head(bigrams$token,3))," ")
+          cat(result[[1]][2],result[[2]][2],result[[3]][2],sep = ", ",fill=T)
         } else {
           unigrams <- subset(df.1g,grepl(paste("^",paste(gsub(" ",
                                                              "",
@@ -131,8 +130,7 @@ ngraminator <- function(x, spaces) {
                                                                  "",x)),sep=""),sep=""),token))
           unigrams$conditional <- 0.4 * 0.4 * 0.4 * (as.numeric(unigrams$prob))
           unigrams <- unigrams[order(-unigrams$conditional),]
-          result <- head(unigrams$token,1)
-          print(result)
+          cat(paste(head(unigrams$token,3),collapse = ", "))
         }
       }
     }  
