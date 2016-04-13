@@ -25,15 +25,20 @@ ngraminator <- function(x, spaces) {
       bigrams$conditional <- 0.4 * (as.numeric(bigrams$prob)/prob_a$prob)
       bigrams <- bigrams[order(-bigrams$conditional),]
       result <- strsplit(as.character(head(bigrams$token,3))," ")
-      cat(result[[1]][2],result[[2]][2],result[[3]][2],sep = ", ",fill=T)
+      for (i in result){
+        cat("<span class='label label-success'>",i[2],"</span>",sep="",fill=T)
+      }
+      
     } else {
       unigrams <- subset(df.1g,grepl(paste("^",
                                            paste(gsub(" ","",sub(temp[[1]][1],"",x)),
                                                  sep=""),sep=""),token))
       unigrams$conditional <- 0.4 * 0.4 * (as.numeric(unigrams$prob))
       unigrams <- unigrams[order(-unigrams$conditional),]
-      result <- head(unigrams$token,1)
-      print(result)
+      result <- head(unigrams$token,3)
+      for (i in result){
+        cat("<span class='label label-success'>",i,"</span>",sep="",fill=T)
+      }
     }
   }
   
@@ -52,7 +57,10 @@ ngraminator <- function(x, spaces) {
       trigrams$conditional <- 0.4 * (as.numeric(trigrams$prob)/prob_a$prob)
       trigrams <- trigrams[order(-trigrams$conditional),]
       result <- strsplit(as.character(head(trigrams$token,3))," ")
-      cat(result[[1]][3],result[[2]][3],result[[3]][3],sep = ", ",fill=T)
+      for (i in result){
+        cat("<span class='label label-success'>",i[3],"</span>",sep="",fill=T)
+      }
+      
     } else {
       prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][2],sep=""),token))[1,]
       bigrams <- subset(df.2g,grepl(paste("^",
@@ -62,7 +70,10 @@ ngraminator <- function(x, spaces) {
         bigrams$conditional <- 0.4 * 0.4 * (as.numeric(bigrams$prob)/prob_a$prob)
         bigrams <- bigrams[order(-bigrams$conditional),]
         result <- strsplit(as.character(head(bigrams$token,3))," ")
-        cat(result[[1]][2],result[[2]][2],result[[3]][2],sep = ", ",fill=T)
+        for (i in result){
+          cat("<span class='label label-success'>",i[2],"</span>",sep="",fill=T)
+        }
+        
       } else {
         unigrams <- subset(df.1g,grepl(paste("^",paste(gsub(" ",
                                                   "",
@@ -70,7 +81,11 @@ ngraminator <- function(x, spaces) {
                                                       "",x)),sep=""),sep=""),token))
         unigrams$conditional <- 0.4 * 0.4 * (as.numeric(unigrams$prob))
         unigrams <- unigrams[order(-unigrams$conditional),]
-        cat(paste(head(unigrams$token,3),collapse = ", "))
+        result <- head(unigrams$token,3)
+        for (i in result){
+          cat("<span class='label label-success'>",i,"</span>",sep="",fill=T)
+        }
+        
       }
     }
   }
@@ -90,7 +105,10 @@ ngraminator <- function(x, spaces) {
       quadgrams$conditional <- 0.4 * (as.numeric(quadgrams$prob)/prob_a$prob)
       quadgrams <- quadgrams[order(-quadgrams$conditional),]
       result <- strsplit(as.character(head(quadgrams$token,3))," ")
-      cat(result[[1]][4],result[[2]][4],result[[3]][4],sep = ", ",fill=T)
+      for (i in result){
+        cat("<span class='label label-success'>",i[4],"</span>",sep="",fill=T)
+      }
+      
     } else {    
       # probability of last two words
       prob_a <- subset(df.2g,grepl(paste("^",
@@ -109,7 +127,10 @@ ngraminator <- function(x, spaces) {
         trigrams$conditional <- 0.4 * 0.4 * (as.numeric(trigrams$prob)/prob_a$prob)
         trigrams <- trigrams[order(-trigrams$conditional),]
         result <- strsplit(as.character(head(trigrams$token,3))," ")
-        cat(result[[1]][3],result[[2]][3],result[[3]][3],sep = ", ",fill=T)
+        for (i in result){
+          cat("<span class='label label-success'>",i[3],"</span>",sep="",fill=T)
+        }
+        
       } else {
         prob_a <- subset(df.1g,grepl(paste("^",temp[[1]][3],sep=""),token))[1,]
         bigrams <- subset(df.2g,grepl(paste("^",paste(gsub(" ",
@@ -121,7 +142,10 @@ ngraminator <- function(x, spaces) {
           bigrams$conditional <- 0.4 * 0.4 * 0.4 * (as.numeric(bigrams$prob))
           bigrams <- bigrams[order(-bigrams$conditional),]
           result <- strsplit(as.character(head(bigrams$token,3))," ")
-          cat(result[[1]][2],result[[2]][2],result[[3]][2],sep = ", ",fill=T)
+          for (i in result){
+            cat("<span class='label label-success'>",i[2],"</span>",sep="",fill=T)
+          }
+          
         } else {
           unigrams <- subset(df.1g,grepl(paste("^",paste(gsub(" ",
                                                              "",
@@ -130,7 +154,10 @@ ngraminator <- function(x, spaces) {
                                                                  "",x)),sep=""),sep=""),token))
           unigrams$conditional <- 0.4 * 0.4 * 0.4 * (as.numeric(unigrams$prob))
           unigrams <- unigrams[order(-unigrams$conditional),]
-          cat(paste(head(unigrams$token,3),collapse = ", "))
+          result <- head(unigrams$token,3)
+          for (i in result){
+            cat("<span class='label label-success'>",i,"</span>",sep="",fill=T)
+          }
         }
       }
     }  
@@ -138,7 +165,7 @@ ngraminator <- function(x, spaces) {
 }
 
 phraseinator <- function(x) {
-  if(nchar(x) >= mean(nchar(df.3g$token))) {
+  if(nchar(x) >= mean(nchar(df.2g$token))) {
     x <- tolower(x)
     # unigrams
     tokens <- unlist(strsplit(x,"[^a-z]+"))
@@ -154,8 +181,10 @@ phraseinator <- function(x) {
     df2 <- data.frame(token=c(names(freq2),df.2g$token),freq=c(freq2,df.2g$freq))
     
     df2 <- df2 %>% group_by(token) %>% summarize(freq = sum(freq))
-    print("Thanks for improving my model!")
-  } else { print("This phrase is too short.") }
+    df2 <- df2 %>% mutate(prob = freq/sum(freq)) %>% arrange(desc(prob))
+    write.csv(df.2g,"data/twograms.csv",row.names = F)
+    return("Thanks for improving my model!")
+  } else { return("This phrase is too short.") }
 }
 
 betty <- function(x) {
@@ -165,7 +194,10 @@ betty <- function(x) {
   # unigram
   if(!grepl(" ",x) >= 1) {
     search <- subset(df.1g,grepl(paste("^",x,sep=""),token))
-    cat(paste(head(search$token,3),collapse = ", "))
+    result <- head(search$token,3)
+    for (i in result){
+      cat("<span class='label label-success'>",i,"</span>",sep="",fill=T)
+    }
   } 
   
   # everything else
