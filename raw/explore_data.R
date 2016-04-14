@@ -12,7 +12,7 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0275 * twitter.n,nlines=twitter.n)),
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0225 * twitter.n,nlines=twitter.n)),
           data.frame(sample_lines("data/en_US.blogs.txt", .0475 * blog.n, nlines=blog.n)),
           data.frame(sample_lines("data/en_US.news.txt", .0475 * news.n, nlines=news.n)),
           data.frame(readLines("data/en_US.academic.txt", encoding="UTF-8")),
@@ -45,7 +45,9 @@ c <- tm_map(c, f, bad.words,"")
 
 # punctuation
 punctuation <- "[^[:alnum:][:space:]'-]"
+double.hyphen <- "--"
 c <- tm_map(c, f, punctuation,"")
+c <- tm_map(c, f, double.hyphen,"")
 
 # # TOKENIZERS
 c.quant <- corpus(c)

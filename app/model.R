@@ -178,11 +178,15 @@ phraseinator <- function(x) {
     # frequencies
     freq2 <- sort(table(tokens2),decreasing = T)
     
-    df2 <- data.frame(token=c(names(freq2),df.2g$token),freq=c(freq2,df.2g$freq))
-    
-    df2 <- df2 %>% group_by(token) %>% summarize(freq = sum(freq))
-    df2 <- df2 %>% mutate(prob = freq/sum(freq)) %>% arrange(desc(prob))
-    write.csv(df.2g,"data/twograms.csv",row.names = F)
+    withProgress(message="Adding Phrase", {
+      df2 <- data.frame(token=c(names(freq2),df.2g$token),freq=c(freq2,df.2g$freq))
+      incProgress(1/4,detail="merging data")
+      df2 <- df2 %>% group_by(token) %>% summarize(freq = sum(freq))
+      incProgress(1/2,detail="calculating")
+      df2 <- df2 %>% mutate(prob = freq/sum(freq)) %>% arrange(desc(prob))
+      incProgress(3/4,detail="writing")
+      write.csv(df2,"data/twograms.csv",row.names = F)
+    })
     return("Thanks for improving my model!")
   } else { return("This phrase is too short.") }
 }
