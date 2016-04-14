@@ -32,7 +32,7 @@ margin-right: 12px;
                 includeCSS("www/css/jquery-ui.min.css"),
                 includeScript("www/js/jquery-ui.min.js"),
                 includeScript("www/js/script.js"),
-  
+
   # Application Title
   titlePanel("NexWord: Predictive Text Generator"),
   

@@ -2,7 +2,6 @@ source("model.R")
 
 shinyServer(function(input,output,session){
   
-
   output$result <- renderPrint(
     betty(input$text)
   )
@@ -11,7 +10,7 @@ shinyServer(function(input,output,session){
     output$dialog <- renderUI({
       phraseinator(input$text)
     })
-    
+
   })
 
 })

@@ -1,5 +1,5 @@
 $(document).ready(function() {
   $("#submitPhrase").on('click', function() {
-    $("#dialog").dialog();
+      setTimeout(function() { jQuery("#dialog").dialog() }, 8000);
   })
 });
