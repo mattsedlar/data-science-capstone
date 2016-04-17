@@ -4,6 +4,7 @@ require(LaF)
 require(SnowballC)
 require(quanteda)
 
+options(mc.cores = 1)
 # count lines first to speed up process
 twitter.n <- countLines("data/en_US.twitter.txt")
 blog.n <- countLines("data/en_US.blogs.txt")
@@ -12,21 +13,20 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0225 * twitter.n,nlines=twitter.n)),
-          data.frame(sample_lines("data/en_US.blogs.txt", .0475 * blog.n, nlines=blog.n)),
-          data.frame(sample_lines("data/en_US.news.txt", .0475 * news.n, nlines=news.n)),
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0275 * twitter.n,nlines=twitter.n)),
+          data.frame(sample_lines("data/en_US.blogs.txt", .05 * blog.n, nlines=blog.n)),
+          data.frame(sample_lines("data/en_US.news.txt", .05 * news.n, nlines=news.n)),
           data.frame(readLines("data/en_US.academic.txt", encoding="UTF-8")),
           data.frame(readLines("data/en_US.entertainment.txt", encoding = "UTF-8")))
 
 # # corpora with tm
 c <- VCorpus(VectorSource(docs))
-
  
 # eliminate whitespace
 c <- tm_map(c, stripWhitespace)
 (f <- content_transformer(function(x,pattern,sub) gsub(pattern,sub,x)))
 # to lower case
-c <- tm_map(c, content_transformer(tolower))
+# c <- tm_map(c, content_transformer(tolower))
 # remove numbers
 c <- tm_map(c, content_transformer(removeNumbers))
 
@@ -56,12 +56,13 @@ rm(c)
 #unigrams
 tokens <- tokenize(c.quant)
 dfm <- dfm(tokens)
+dfm <- trim(dfm, minDoc=2)
 rm(tokens)
 
 #bigrams
 tokens2 <- tokenize(c.quant,ngrams=2, concatenator=" ")
 dfm2 <- dfm(tokens2)
-dfm2 <- trim(dfm2, minCount = 2)
+dfm2 <- trim(dfm2, minDoc = 2)
 rm(tokens2)
 
 #trigrams
@@ -71,7 +72,7 @@ dfm3 <- trim(dfm3, minDoc = 2)
 rm(tokens3)
 
 #quadgrams
-tokens4 <- tokenize(c.quant,what="fasterword",ngrams=4, concatenator=" ")
+tokens4 <- tokenize(c.quant,what="fastestword",ngrams=4, concatenator=" ")
 dfm4 <- dfm(tokens4)
 dfm4 <- trim(dfm4, minDoc = 2)
 rm(tokens4)

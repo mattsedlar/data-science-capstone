@@ -22,6 +22,11 @@ border: 1px solid #fff;
 padding: 0 24px 24px 24px;
 }
 
+input#text {
+width: 100%;
+font-size: 18px;
+}
+
 #result span {
 font-size: 18px;
 margin-right: 12px;
@@ -44,6 +49,7 @@ margin-right: 12px;
          h4("Predictions:"),
          htmlOutput("result"),
          uiOutput("dialog")
-  )
+  ),
+  tags$small("Created by Matt Sedlar, 2016")
   
 ))

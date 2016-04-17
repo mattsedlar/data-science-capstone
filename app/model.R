@@ -166,7 +166,6 @@ ngraminator <- function(x, spaces) {
 
 phraseinator <- function(x) {
   if(nchar(x) >= mean(nchar(df.2g$token))) {
-    x <- tolower(x)
     # unigrams
     tokens <- unlist(strsplit(x,"[^a-z]+"))
     tokens <- tokens[tokens != " "]
@@ -192,9 +191,6 @@ phraseinator <- function(x) {
 }
 
 betty <- function(x) {
-  phrase <- x
-  # convert to lowercase
-  x <- tolower(x)
   # unigram
   if(!grepl(" ",x) >= 1) {
     search <- subset(df.1g,grepl(paste("^",x,sep=""),token))
