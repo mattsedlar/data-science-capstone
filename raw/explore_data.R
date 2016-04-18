@@ -13,9 +13,9 @@ news.n <- countLines("data/en_US.news.txt")
 # read lines randomly into a data table column
 set.seed(1234)
 
-docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .0275 * twitter.n,nlines=twitter.n)),
-          data.frame(sample_lines("data/en_US.blogs.txt", .05 * blog.n, nlines=blog.n)),
-          data.frame(sample_lines("data/en_US.news.txt", .05 * news.n, nlines=news.n)),
+docs <- c(data.frame(sample_lines("data/en_US.twitter.txt", .035 * twitter.n,nlines=twitter.n)),
+          data.frame(sample_lines("data/en_US.blogs.txt", .07 * blog.n, nlines=blog.n)),
+          data.frame(sample_lines("data/en_US.news.txt", .06 * news.n, nlines=news.n)),
           data.frame(readLines("data/en_US.academic.txt", encoding="UTF-8")),
           data.frame(readLines("data/en_US.entertainment.txt", encoding = "UTF-8")))
 
@@ -45,7 +45,7 @@ c <- tm_map(c, f, bad.words,"")
 
 # punctuation
 punctuation <- "[^[:alnum:][:space:]'-]"
-double.hyphen <- "--"
+double.hyphen <- "(--|^-)"
 c <- tm_map(c, f, punctuation,"")
 c <- tm_map(c, f, double.hyphen,"")
 
